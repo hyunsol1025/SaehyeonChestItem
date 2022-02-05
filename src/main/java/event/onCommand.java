@@ -2,6 +2,7 @@ package event;
 
 import main.Main;
 import main.PlayerGlobal;
+import manager.ErrorType;
 import manager.Manager;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -50,6 +51,19 @@ public class onCommand implements CommandExecutor {
                     p.sendMessage(ChatColor.RED+"구문이 올바르지 않습니다.\n(사용법: /상자 아이템 [지역이름])");
                 }
 
+            }
+
+            else if(args[0].equals("숨기기")) {
+
+                // /상자 숨기기 지역이름 t/f t/f
+                if(args.length >= 4) {
+                    ErrorType err = Manager.spreadItem(args[1], Boolean.parseBoolean(args[2]), Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]),true);
+                    if(err != null) {
+                        p.sendMessage(Manager.getErrorMessage(err));
+                    } else {
+                        p.sendMessage(ChatColor.GRAY+args[1]+ChatColor.WHITE+" 지역의 상자에 아이템을 숨겼습니다.");
+                    }
+                }
             }
 
             else if(args[0].equals("목록")) {

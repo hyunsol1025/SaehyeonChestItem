@@ -25,7 +25,7 @@ public class onInventory implements Listener {
 
         String inventoryName = e.getView().getTitle();
 
-        if(PlayerGlobal.isItemSetting.get(p.getUniqueId()) && Main.regionYAML.contains(inventoryName+".items")) {
+        if(PlayerGlobal.isItemSetting.containsKey(p.getUniqueId()) && Main.regionYAML.contains(inventoryName+".items")) {
 
             ArrayList<ItemStack> items = (ArrayList<ItemStack>) Main.regionYAML.get(inventoryName+".items");
 
@@ -63,10 +63,5 @@ public class onInventory implements Listener {
             PlayerGlobal.isItemSetting.remove(p.getUniqueId());
             p.sendMessage(ChatColor.GRAY+inventoryName+ChatColor.WHITE+"의 아이템 변경사항을 저장했습니다.");
         }
-    }
-
-    @EventHandler
-    void onInventoryClick(InventoryClickEvent e) {
-        Bukkit.broadcastMessage(""+e.getRawSlot());
     }
 }
