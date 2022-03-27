@@ -46,19 +46,26 @@ public class Manager {
      * <b>상자 좌표 반환 메소드</b><br>특정 지역의 모든 상자 좌표를 반환합니다.
      * @return
      */
-    public static List<Location> getChestLocations(String regionName, boolean ignoreCantOpenChest, boolean ignoreTrappedChest) {
+    public static ArrayList<Location> getChestLocations(String regionName, boolean ignoreCantOpenChest, boolean ignoreTrappedChest) {
         Location loc1 = (Location)Main.regionYAML.get(regionName+".pos1");
         Location loc2 = (Location)Main.regionYAML.get(regionName+".pos2");
 
-        List<Location> locations = new ArrayList<>();
+        ArrayList<Location> locations = new ArrayList<>();
 
         for(Location loc : Func.AllLocationWithin(loc1, loc2)) {
-            if( (loc.getBlock().getType() == Material.CHEST || loc.getBlock().getType() == Material.TRAPPED_CHEST) &&
-                    !(ignoreCantOpenChest && isBlockChestOpen(loc.clone().add(0,1,0).getBlock().getType())) &&
-                    !(ignoreTrappedChest && loc.getBlock().getType() == Material.TRAPPED_CHEST) ) {
-                locations.add(loc);
-                //Bukkit.broadcastMessage("loc: "+loc+" / loc's type: "+loc.getBlock().getType());
 
+            // 만약 블럭이 상자 또는 덫상자라면
+            if( loc.getBlock().getType() == Material.CHEST || loc.getBlock().getType() == Material.TRAPPED_CHEST) {
+
+                // 만약 열 수 없는 상자는 무시하도록 되어 있고 못여는 상자 가 아니라면
+                if(!(ignoreCantOpenChest && isCantOpenChest(loc))) {
+
+                    // 만약 덫상자를 무시하도록 되어 있고 블럭이 덫상자인 것이 아니라면
+                    if(!(ignoreTrappedChest && loc.getBlock().getType() == Material.TRAPPED_CHEST) ) {
+
+                        locations.add(loc);
+                    }
+                }
             }
         }
 
@@ -107,16 +114,17 @@ public class Manager {
         }
 
         if(clearAllChest) {
+
             for(Location loc : locations) {
+
                 Chest chest = (Chest)loc.getBlock().getState();
                 chest.getBlockInventory().clear();
+
             }
         }
 
         Collections.shuffle(items);
         Collections.shuffle(locations);
-
-        //Bukkit.broadcastMessage("숨겨야 하는 아이템 갯수: "+ items.size()+"개");
 
         for(int i = 0; i < items.size(); i++) {
             Chest chest = (Chest) locations.get(i).getBlock().getState();
@@ -149,11 +157,12 @@ public class Manager {
     }
 
     /**
-     * <b>이 블럭 종류(Material)이 상자 위에 있으면 상자가 열리지 않는가?</b><br>특정 Material이 상자 위에 있으면 상자가 열리는 지의 여부를 반환합니다.<br>상자가 열리는 것이 막힌다면 <b>true</b>, 그렇지 않다면 <b>false</b>를 반환합니다.
+     * <b>이 상자는 열리지 못하는가?</b><br>특정 좌표의 상자 위에 있으면 상자가 열리는 지의 여부를 반환합니다.<br>상자가 열리는 것이 막힌다면 <b>true</b>, 그렇지 않다면 <b>false</b>를 반환합니다.
      * @return
      */
-    public static boolean isBlockChestOpen(Material mat) {
-        return (mat.toString().contains("TORCH") || mat.toString().contains("AIR") || mat.toString().contains("GLASS") || mat.toString().contains("STAIR"));
+    public static boolean isCantOpenChest(Location chestLocation) {
+        Material mat = chestLocation.clone().add(0,1,0).getBlock().getType();
+        return !(mat.toString().contains("TORCH") || mat.toString().contains("AIR") || mat.toString().contains("GLASS") || mat.toString().contains("STAIR"));
     }
 
     public static String getErrorMessage(ErrorType err) {
