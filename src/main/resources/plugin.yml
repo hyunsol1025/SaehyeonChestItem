@@ -1,6 +1,6 @@
 name: SaehyeonChestItem
 version: '${project.version}'
-main: main.Main
+main: saehyeon.chestitem.main.Main
 api-version: 1.16
 authors: [ Saehyeon ]
 description: 세현의 아이템 상자 플러그인
