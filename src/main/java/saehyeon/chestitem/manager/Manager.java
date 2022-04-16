@@ -98,7 +98,7 @@ public class Manager {
      * @param ignoreTrappedChest
      * @return
      */
-    public static ErrorType spreadItem(List<ItemStack> items, String regionName, boolean clearAllChest, boolean ignoreCantOpenChest, boolean ignoreTrappedChest, boolean enableNotify) {
+    public static ErrorType spreadItem(ArrayList<ItemStack> items, String regionName, boolean clearAllChest, boolean ignoreCantOpenChest, boolean ignoreTrappedChest, boolean enableNotify) {
         //Bukkit.broadcastMessage("spreadItem 메소드가 호출되었어요!");
 
         if(!Main.regionYAML.contains(regionName)) {

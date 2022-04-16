@@ -73,7 +73,7 @@ public class onCommand implements CommandExecutor {
 
             else if(args[0].equals("내용물보기")) {
                 // 상자 내용물보기 [지역이름] [내용물이 없는 상자도 출력할지 여부] [열 수 없는 상자 무시 여부] [덫상자 무시 여부]
-                if(args.length >= 3) {
+                if(args.length >= 4) {
                     HashMap<Location, List<ItemStack>> map = Manager.getChestContents(args[1],Boolean.parseBoolean(args[2]),Boolean.parseBoolean(args[3]));
 
                     p.sendMessage("\n§7"+args[1]+"§f 지역의 상자 내용물: ");
@@ -108,7 +108,7 @@ public class onCommand implements CommandExecutor {
                     });
 
                 } else {
-                    p.sendMessage("§c사용법: /상자 내용물보기 [지역이름] [내용물이 없는 상자도 출력할지 여부]");
+                    p.sendMessage("§c사용법: /상자 내용물보기 [지역이름] [내용물이 없는 상자도 출력할지 여부] [덫상자 무시 여부]");
                 }
             }
 
