@@ -1,11 +1,9 @@
 package saehyeon.chestitem.event;
 
 import saehyeon.chestitem.lib.Otherf;
-import saehyeon.chestitem.main.Main;
 import saehyeon.chestitem.main.PlayerGlobal;
 import saehyeon.chestitem.ErrorType;
-import saehyeon.chestitem.item.Chest;
-import net.md_5.bungee.api.ChatColor;
+import saehyeon.chestitem.item.Item;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -32,13 +30,20 @@ public class onCommand implements CommandExecutor {
                 case "지역설정":
                     if(Otherf.isPosValid(p)) {
                         if (args.length >= 3) {
+
                             Location pos1 = PlayerGlobal.POS1.get(p);
                             Location pos2 = PlayerGlobal.POS2.get(p);
 
-                            Region.set(args[1], pos1, pos2, Boolean.parseBoolean(args[2]));
+                            Region r = new Region(args[1], pos1,pos2, null);
+                            r.create();
+
+                            p.sendMessage("§7"+args[1]+"§f 지역을 생성했습니다.");
+
                         } else {
                             p.sendMessage("§c구문이 올바르지 않습니다. \n(사용법: /상자 지역설정 [지역이름] [true/false (이미 등록된 지역이라면 무시할 것인지에 대한 여부)])");
                         }
+                    } else {
+                        p.sendMessage(ErrorType.INVALID_POSITION.toMessage());
                     }
 
                     break;
@@ -46,12 +51,12 @@ public class onCommand implements CommandExecutor {
                 case "지역삭제":
                     if(args.length >= 2) {
 
-                        String regionName = args[1];
+                        Region r = Region.getByName(args[1]);
 
-                        if(Region.contains(regionName)) {
+                        if(r != null) {
 
-                            Region.remove(regionName);
-                            p.sendMessage("§7"+regionName+"§f(을)를 제거했습니다.");
+                            r.remove();
+                            p.sendMessage("§7"+args[1]+"§f(을)를 제거했습니다.");
 
                         } else {
 
@@ -83,17 +88,24 @@ public class onCommand implements CommandExecutor {
                     // 상자 숨기기 [지역이름] t/f t/f
                     if(args.length >= 4) {
 
-                        ErrorType err = Chest.spreadItem(args[1], Boolean.parseBoolean(args[2]), Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]),true);
+                        Region r = Region.getByName(args[1]);
 
-                        if(err == null) {
+                        if(r != null) {
+                            ErrorType err = r.spreadItem(Boolean.parseBoolean(args[2]), Boolean.parseBoolean(args[3]), Boolean.parseBoolean(args[4]), Boolean.parseBoolean(args[5]));
 
-                            // 오류가 없음
-                            p.sendMessage("§7"+args[1]+"§f지역의 상자에 아이템을 숨겼습니다.");
+                            if (err == null) {
 
+                                // 오류가 없음
+                                p.sendMessage("§7" + args[1] + "§f지역의 상자에 아이템을 숨겼습니다.");
+
+                            } else {
+
+                                // 오류가 있음
+                                p.sendMessage(err.toMessage());
+
+                            }
                         } else {
-
-                            // 오류가 있음
-                            p.sendMessage(err.toMessage());
+                            sender.sendMessage(ErrorType.NOT_EXIST_REGION.toMessage());
                         }
                     } else {
                         p.sendMessage("§c사용법: /상자 숨기기 [지역이름] [지역의 모든 상자의 내용물을 비우고 진행할지 여부] [열 수 없는 상자 무시 여부] [덫상자는 무시 여부] [아이템을 숨겼다는 공지 출력 여부]");
@@ -104,45 +116,52 @@ public class onCommand implements CommandExecutor {
                 case "내용물보기":
                     if(args.length >= 4) {
 
-                        // 지역이름
-                        String regionName = args[1];
+                        Region r = Region.getByName(args[1]);
 
-                        // 내용물 없는 상자는 무시함?
-                        boolean printNoItemChest = Boolean.parseBoolean(args[2]);
+                        if(r != null) {
 
-                        // 열 수 없는 상자는 무시함?
-                        boolean ignoreCantOpenChest = Boolean.parseBoolean(args[3]);
+                            // 내용물 없는 상자는 무시함?
+                            boolean ignoreNoItemChest = Boolean.parseBoolean(args[2]);
 
-                        HashMap<Location, List<ItemStack>> map = Region.getChestContents(args[1], printNoItemChest, ignoreCantOpenChest);
+                            // 열 수 없는 상자는 무시함?
+                            boolean ignoreCantOpenChest = Boolean.parseBoolean(args[3]);
 
-                        p.sendMessage("\n§7"+args[1]+"§f 지역의 상자 내용물: ");
+                            HashMap<Location, List<ItemStack>> map = r.getChestContents(ignoreNoItemChest, ignoreCantOpenChest);
 
-                        map.forEach((key, value) -> {
+                            p.sendMessage("\n§7" + args[1] + "§f 지역의 상자 내용물: ");
 
-                            value.removeAll(Collections.singleton(null));
+                            map.forEach((key, value) -> {
 
-                            // 배열이 비었고
-                            if(value.isEmpty() && Boolean.parseBoolean(args[2])) {
-                                p.sendMessage(key.getX()+", "+key.getY()+", "+key.getZ()+": 아이템이 없습니다.");
-                            }
+                                value.removeAll(Collections.singleton(null));
 
-                            else if(!value.isEmpty()) {
-                                StringBuilder sb = new StringBuilder("");
+                                // 상자에 아이템이 있음
+                                if(!value.isEmpty()) {
+                                    StringBuilder sb = new StringBuilder("");
 
-                                for(ItemStack i : value) {
+                                    for (ItemStack i : value) {
 
-                                    sb.append(i.getType())
-                                            .append(" x")
-                                            .append(i.getAmount())
-                                            .append(", ");
+                                        sb.append(i.getType())
+                                                .append(" x")
+                                                .append(i.getAmount())
+                                                .append(", ");
 
+                                    }
+
+                                    p.sendMessage(key.getX() + ", " + key.getY() + ", " + key.getZ() + ": " + sb.substring(0, sb.length()));
                                 }
 
-                                p.sendMessage(key.getX()+", "+key.getY()+", "+key.getZ()+": "+sb.substring(0, sb.length()));
-                            }
+                                // 아이템이 없음 + 아이템이 없는 상자는 무시
+                                else if(!ignoreNoItemChest) {
+                                    p.sendMessage(key.getX() + ", " + key.getY() + ", " + key.getZ() + ": 아이템이 없습니다.");
+                                }
 
-                        });
+                            });
 
+                        } else {
+
+                            p.sendMessage(ErrorType.NOT_EXIST_REGION.toMessage());
+
+                        }
                     } else {
                         p.sendMessage("§c사용법: /상자 내용물보기 [지역이름] [내용물이 없는 상자도 출력할지 여부] [덫상자 무시 여부]");
                     }
