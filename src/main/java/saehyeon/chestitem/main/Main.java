@@ -11,8 +11,6 @@ import java.io.File;
 public final class Main extends JavaPlugin {
 
     public static Main instance;
-    public static YamlConfiguration regionYAML = new YamlConfiguration();
-    public static File regionFile;
 
     @Override
     public void onEnable() {
@@ -26,10 +24,10 @@ public final class Main extends JavaPlugin {
         getCommand("상자").setTabCompleter(new onTabComplete());
         getCommand("상자").setExecutor(new onCommand());
 
-        regionFile = new File(getDataFolder(), "regions.yml");
+        YML.regionFile = new File(getDataFolder(), "regions.yml");
 
         try {
-            regionYAML.load(regionFile);
+            YML.regionYML.load(YML.regionFile);
         } catch(Exception e) {
             e.printStackTrace();
         }
@@ -39,7 +37,7 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         try {
-            regionYAML.save(regionFile);
+            YML.regionYML.save(YML.regionFile);
         } catch(Exception e) {
 
         }

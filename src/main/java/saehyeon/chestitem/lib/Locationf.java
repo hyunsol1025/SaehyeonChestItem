@@ -1,20 +1,10 @@
-package saehyeon.chestitem.main;
+package saehyeon.chestitem.lib;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.io.BukkitObjectInputStream;
-import org.bukkit.util.io.BukkitObjectOutputStream;
 
-import java.io.*;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Random;
 
-public class Func {
-
+public class Locationf {
     public static ArrayList<Location> AllLocationWithin(Location loc1, Location loc2) {
         ArrayList<Location> loc = new ArrayList<>();
 
@@ -42,9 +32,5 @@ public class Func {
         }
 
         return false;
-    }
-
-    public static int rand(int min, int max) {
-        return new Random().nextInt(max)+min;
     }
 }
